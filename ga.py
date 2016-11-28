@@ -198,8 +198,6 @@ def read():
         sentiments = {}
         event_id = {}
 
-        event_count = {}
-
         n = 0  # total characteristics
         for row in sentiment_reader:
             date = row[0]
@@ -208,23 +206,10 @@ def read():
                 event_id[event] = n
                 n += 1
 
-                event_count[event] = 1
-            else:
-                event_count[event] += 1
-
             weight = int(row[4])
             if date not in sentiments:
                 sentiments[date] = {}
             sentiments[date][event] = weight
-
-    i = 0
-    for event in event_count.keys():
-        if event_count[event] < 200:
-            event_id[event] = -1
-            n -= 1
-        else:
-            event_id[event] = i
-            i += 1
 
     return trends, sentiments, event_id, m, n
 
@@ -237,9 +222,7 @@ def build_vectors(trends, sentiments, event_id, m, n):
     for i in xrange(0, m):
         date = dates[i]
         for event in sentiments[date]:
-            if event_id[event] != -1:
-                X_all[i, event_id[event]] = sentiments[date][event]
-            # X_all[i, event_id[event]] = sentiments[date][event]
+            X_all[i, event_id[event]] = sentiments[date][event]
         X_all[i, n] = 1
         y_all[i] = trends[date]
 
