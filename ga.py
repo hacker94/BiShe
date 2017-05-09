@@ -8,7 +8,7 @@ Created on Wed Sep 14 23:41:26 2016
 import random
 import csv
 import numpy as np
-import sys
+import time
 
 
 class Population:
@@ -168,7 +168,7 @@ class FitnessCalc:
         tmp = FitnessCalc.h(theta, X)
         for i in xrange(m):
             if y[i] == 1:
-                rst *= tmp[i] * 2
+                rst *= tmp[i] + tmp[i]
             else:
                 rst *= (1 - tmp[i]) * 2
         return rst
@@ -180,8 +180,8 @@ class FitnessCalc:
         return fitness
 
 
-def read():
-    with open('DAX-price-2-years.csv', 'rb') as price_csv, open('DAX-sentiment-2-years.csv', 'rb') as sentiment_csv:
+def read(path, price_file, sentiment_file):
+    with open(path + price_file, 'rb') as price_csv, open(path + sentiment_file, 'rb') as sentiment_csv:
         price_reader = csv.reader(price_csv)
         sentiment_reader = csv.reader(sentiment_csv)
 
@@ -230,18 +230,22 @@ def build_vectors(trends, sentiments, event_id, m, n):
 
 
 def train(X, y):
+    total_generation = 1000
+    population_size = 100
+
     n = X.shape[1]
 
     Individual.set_default_genes_len(n)
     FitnessCalc.data_X = X
     FitnessCalc.data_y = y
-    my_pop = Population(100)
+    my_pop = Population(population_size)
     generation_cnt = 0
-    total_generation = 1000
     while generation_cnt < total_generation:
         generation_cnt += 1
-        print 'Generation: %d  Fittest: %f' % (generation_cnt, my_pop.get_fittest().get_fitness())
+        t1 = time.clock()
+        #print 'Generation: %d  Fittest: %f' % (generation_cnt, my_pop.get_fittest().get_fitness())
         my_pop = Algorithm.evolve_population(my_pop, float(generation_cnt) / total_generation)
+        print time.clock() - t1
 
     print 'Solution found!'
     print 'Generation: %d' % generation_cnt
@@ -261,11 +265,17 @@ def test(X, y, theta):
 
 
 if __name__ == '__main__':
+    path = 'C:/Users/SyW/Desktop/BiShe/'
+    #price_file = 'DAX-price-2-years.csv'
+    #sentiment_file = 'DAX-sentiment-2-years.csv'
+    price_file = 'GLD_price.csv'
+    sentiment_file = 'GLD_Sentiment.csv'
+
     training_num = 300
     validation_num = training_num + 100
 
     # read trends and sentiments from file
-    trends, sentiments, event_id, m, n = read()
+    trends, sentiments, event_id, m, n = read(path, price_file, sentiment_file)
 
     # build vectors
     X_all, y_all = build_vectors(trends, sentiments, event_id, m, n)
@@ -273,7 +283,15 @@ if __name__ == '__main__':
     # work out theta
     X = X_all[0:training_num]
     y = y_all[0:training_num]
+    Xt, yt = X, y
+    for i in range(5):
+        X = np.concatenate((X, Xt))
+        y = np.concatenate((y, yt))
     theta = train(X, y)
+
+    with open(path + 'out.txt', 'w') as fout:
+        for t in theta:
+            fout.write("%.9f\n" % t)
 
     # validation
     X_test = X_all[training_num:validation_num]

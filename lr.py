@@ -10,7 +10,8 @@ import numpy as np
 
 
 def read():
-    with open('DAX-price-2-years.csv', 'rb') as price_csv, open('DAX-sentiment-2-years.csv', 'rb') as sentiment_csv:
+    #with open('DAX-price-2-years.csv', 'rb') as price_csv, open('DAX-sentiment-2-years.csv', 'rb') as sentiment_csv:
+    with open('GLD_price.csv', 'rb') as price_csv, open('GLD_Sentiment.csv', 'rb') as sentiment_csv:
         price_reader = csv.reader(price_csv)
         sentiment_reader = csv.reader(sentiment_csv)
 
@@ -82,6 +83,7 @@ def h(theta, x):
 def train(X, y):
     m = X.shape[0]
     n = X.shape[1]
+    print n, 'lalala'
     theta = np.zeros(n)
     alpha = 0.1
 
