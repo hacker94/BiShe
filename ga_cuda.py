@@ -177,6 +177,10 @@ class FitnessCalc:
     }
     """)
     h = mod.get_function("h")
+    
+    @staticmethod
+    def h_cpu(theta, x):
+        return 1 / (1 + np.exp(-np.dot(x, theta) / theta.shape[0] * 0.0001))  # x can be a vector or a matrix
 
     @staticmethod
     def l(theta):
@@ -274,12 +278,12 @@ def train(X, y):
     FitnessCalc.data_y = y
     my_pop = Population(population_size)
     generation_cnt = 0
+    t1 = time.clock()
     while generation_cnt < total_generation:
         generation_cnt += 1
-        t1 = time.clock()
         #print 'Generation: %d  Fittest: %f' % (generation_cnt, my_pop.get_fittest().get_fitness())
         my_pop = Algorithm.evolve_population(my_pop, float(generation_cnt) / total_generation)
-        print time.clock() - t1
+    print 'Training time: %fs' % (time.clock() - t1)
 
     print 'Solution found!'
     print 'Generation: %d' % generation_cnt
@@ -291,7 +295,7 @@ def test(X, y, theta):
     total = y.shape[0]
     correct = 0
     for i in xrange(total):
-        yh = FitnessCalc.h(theta, X[i])
+        yh = FitnessCalc.h_cpu(theta, X[i])
         yh = 1 if yh > 0.5 else 0
         if yh == y[i]:
             correct += 1
@@ -318,10 +322,10 @@ if __name__ == '__main__':
     # work out theta
     X = X_all[0:training_num]
     y = y_all[0:training_num]
-    Xt, yt = X, y
+    '''Xt, yt = X, y
     for i in range(5):
         X = np.concatenate((X, Xt))
-        y = np.concatenate((y, yt))
+        y = np.concatenate((y, yt))'''
     theta = train(X, y)
 
     with open(path + 'out.txt', 'w') as fout:

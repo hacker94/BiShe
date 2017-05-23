@@ -9,7 +9,6 @@ import sys
 import time
 import csv
 import numpy as np
-#np.random.seed(1337)  # for reproducibility
 
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
@@ -18,8 +17,8 @@ from keras import regularizers
 
 
 def read():
-    with open('DAX-price-2-years.csv', 'rb') as price_csv, open('DAX-sentiment-2-years.csv', 'rb') as sentiment_csv:
-    #with open('GLD_price.csv', 'rb') as price_csv, open('GLD_Sentiment.csv', 'rb') as sentiment_csv:
+    #with open('DAX-price-2-years.csv', 'rb') as price_csv, open('DAX-sentiment-2-years.csv', 'rb') as sentiment_csv:
+    with open('GLD_price.csv', 'rb') as price_csv, open('GLD_Sentiment.csv', 'rb') as sentiment_csv:
         price_reader = csv.reader(price_csv)
         sentiment_reader = csv.reader(sentiment_csv)
 
@@ -88,25 +87,20 @@ def train(X, y):
     m = X.shape[0]
     n = X.shape[1]
     model = Sequential()
-    layer_in = Dense(20, activation='sigmoid', input_dim=n, W_regularizer=regularizers.l2())
-    layer_1 = Dense(20, activation='sigmoid', W_regularizer=regularizers.l2())
-    layer_2 = Dense(1, activation='sigmoid', W_regularizer=regularizers.l2())
-    model.add(layer_in)
+    layer_1 = Dense(8, activation='sigmoid', input_dim=n, W_regularizer=regularizers.l2())
+    layer_out = Dense(1, activation='sigmoid', W_regularizer=regularizers.l2())
     model.add(layer_1)
-    model.add(Dense(20, activation='sigmoid', input_dim=n, W_regularizer=regularizers.l2()))
-    model.add(Dense(20, activation='sigmoid', input_dim=n, W_regularizer=regularizers.l2()))
-    model.add(Dense(20, activation='sigmoid', input_dim=n, W_regularizer=regularizers.l2()))
-    model.add(layer_2)
+    model.add(Dropout(0.5))
+    model.add(layer_out)
     model.compile(
         optimizer = SGD(lr=0.01),
         loss = 'binary_crossentropy',
         metrics = ['binary_accuracy']
     )
     
-    time_start = time.time()
-    model.fit(X, y, nb_epoch=1000, batch_size=m/10, verbose=0)
-    time_stop = time.time()
-    print time_stop - time_start
+    t1 = time.clock()
+    model.fit(X, y, nb_epoch=10000, batch_size=m, verbose=0)
+    print 'Training time: %fs' % (time.clock() - t1)
     
     #print in_layer.get_weights()
     return model
@@ -135,12 +129,15 @@ if __name__ == '__main__':
 
     # build vectors
     X_all, y_all = build_vectors(trends, sentiments, event_id, m, n)
-    X_all = X_all.astype('float32')
-    y_all = y_all.astype('float32')
+    X_all = X_all.astype('int32')
 
     # work out theta
     X = X_all[0:training_num]
     y = y_all[0:training_num]
+    '''Xt, yt = X, y
+    for i in range(6):
+        X = np.concatenate((X, Xt))
+        y = np.concatenate((y, yt))'''
 
     # build model
     model = train(X, y)

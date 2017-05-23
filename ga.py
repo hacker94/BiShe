@@ -240,12 +240,12 @@ def train(X, y):
     FitnessCalc.data_y = y
     my_pop = Population(population_size)
     generation_cnt = 0
+    t1 = time.clock()
     while generation_cnt < total_generation:
         generation_cnt += 1
-        t1 = time.clock()
         #print 'Generation: %d  Fittest: %f' % (generation_cnt, my_pop.get_fittest().get_fitness())
         my_pop = Algorithm.evolve_population(my_pop, float(generation_cnt) / total_generation)
-        print time.clock() - t1
+    print 'Training time: %fs' % (time.clock() - t1)
 
     print 'Solution found!'
     print 'Generation: %d' % generation_cnt
@@ -266,10 +266,10 @@ def test(X, y, theta):
 
 if __name__ == '__main__':
     path = 'C:/Users/SyW/Desktop/BiShe/'
-    #price_file = 'DAX-price-2-years.csv'
-    #sentiment_file = 'DAX-sentiment-2-years.csv'
-    price_file = 'GLD_price.csv'
-    sentiment_file = 'GLD_Sentiment.csv'
+    price_file = 'DAX-price-2-years.csv'
+    sentiment_file = 'DAX-sentiment-2-years.csv'
+    #price_file = 'GLD_price.csv'
+    #sentiment_file = 'GLD_Sentiment.csv'
 
     training_num = 300
     validation_num = training_num + 100
@@ -283,10 +283,10 @@ if __name__ == '__main__':
     # work out theta
     X = X_all[0:training_num]
     y = y_all[0:training_num]
-    Xt, yt = X, y
+    '''Xt, yt = X, y
     for i in range(5):
         X = np.concatenate((X, Xt))
-        y = np.concatenate((y, yt))
+        y = np.concatenate((y, yt))'''
     theta = train(X, y)
 
     with open(path + 'out.txt', 'w') as fout:
@@ -296,7 +296,7 @@ if __name__ == '__main__':
     # validation
     X_test = X_all[training_num:validation_num]
     y_test = y_all[training_num:validation_num]
-    test(X_test, y_test, theta)
+    #test(X_test, y_test, theta)
 
     # test
     final_test = True
