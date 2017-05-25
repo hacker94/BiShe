@@ -112,7 +112,9 @@ class Algorithm:
     def tournament_selection(pop):
         tournament = Population(Algorithm.tournament_size, False)
         for i in xrange(Algorithm.tournament_size):
-            tournament.append_individual(pop.get_individual(random.randint(0, pop.size() - 1)))
+            tournament.append_individual(
+                    pop.get_individual(random.randint(0, pop.size() - 1))
+            )
         return tournament.get_fittest()
 
     @staticmethod
